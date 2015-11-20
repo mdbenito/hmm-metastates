@@ -11,9 +11,9 @@ def parse(argv):
                 '\t-h, --help\t\tThis help\n' + \
                 '\t-i, --input-file\tSpecifies the input file\n' + \
                 '\t-o, --output-file\tSpecifies the output file [default=input-file.out]\n' + \
-                '\t-j, --jobs\t\tNumber of concurrent jobs to launch [default={}]\n'.format(vals.jobs) + \
-                '\t-t, --trials\t\tSet number of trials for input file [default={}]\n'.format(vals.trials) + \
-                '\t-s, --states\t\tNumber of states to test [default={}]\n'.format(vals.states) + \
+                '\t-j, --jobs\t\tNumber of concurrent jobs to launch [default={}]\n'.format(opts.jobs) + \
+                '\t-t, --trials\t\tSet number of trials for input file [default={}]\n'.format(opts.trials) + \
+                '\t-s, --states\t\tNumber of states to test [default={}]\n'.format(opts.states) + \
                 '\t-a, --auto\t\tParse input filename for number of trials and maximal K\n' + \
                 '\t\t\t\t(Overrides -s, -t)' + \
                 '\t-v, --verbose\tDisplay progress indicators'
