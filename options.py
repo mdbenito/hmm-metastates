@@ -1,6 +1,8 @@
 from __future__ import print_function
 import sys
 import getopt
+import utils
+import re
 from bunch import Bunch
 
 
@@ -8,42 +10,56 @@ def parse(argv):
     opts = Bunch({'input_file': None, 'output_file': None, 'jobs': 1, 'trials': 1, 'states': [2], 'auto': False,
                   'verbose': False})
     usage_str = 'Usage: python metastates.py -i <input-file> -o <output-file>\n\nOther options:\n' + \
-                '\t-h, --help\t\tThis help\n' + \
+                '\t-h, --help\t\t\tThis help\n' + \
                 '\t-i, --input-file\tSpecifies the input file\n' + \
                 '\t-o, --output-file\tSpecifies the output file [default=input-file.out]\n' + \
-                '\t-j, --jobs\t\tNumber of concurrent jobs to launch [default={}]\n'.format(opts.jobs) + \
+                '\t-j, --jobs\t\t\tNumber of concurrent jobs to launch [default={}]\n'.format(opts.jobs) + \
                 '\t-t, --trials\t\tSet number of trials for input file [default={}]\n'.format(opts.trials) + \
                 '\t-s, --states\t\tNumber of states to test [default={}]\n'.format(opts.states) + \
-                '\t-a, --auto\t\tParse input filename for number of trials and maximal K\n' + \
-                '\t\t\t\t(Overrides -s, -t)' + \
-                '\t-v, --verbose\tDisplay progress indicators'
+                '\t-a, --auto\t\t\tParse input filename for number of trials and maximal K\n' + \
+                '\t\t\t\t\t\t(Overrides -s, -t)\n' + \
+                '\t-v, --verbose\t\tDisplay progress and time information'
     try:
-        vals, args = getopt.getopt(argv, 'hi:o:j:t:s:a:v',
-                                   ['help', 'input-file=', 'output-file=', 'jobs=', 'trials=', 'states=', 'auto=',
+        vals, args = getopt.getopt(argv, 'hi:o:j:t:s:av',
+                                   ['help', 'input-file=', 'output-file=', 'jobs=', 'trials=', 'states=', 'auto',
                                     'verbose'])
-    except getopt.GetoptError:
-        print(usage_str)
+    except getopt.GetoptError as error:
+        print('ERROR: ' + error + '\n' + usage_str)
         sys.exit(2)
     for opt, arg in vals:
         if opt in ('-h', '--help'):
             print(usage_str)
             sys.exit()
         elif opt in ('-i', '--input-file'):
-            vals.input_file = arg
+            opts.input_file = arg
         elif opt in ('-o', '--output-file'):
-            vals.output_file = arg
+            opts.output_file = arg
         elif opt in ('-j', '--jobs'):
-            vals.jobs = int(arg)
+            opts.jobs = int(arg)
         elif opt in ('-t', '--trials'):
-            vals.trials = int(arg)
+            opts.trials = int(arg)
         elif opt in ('-s', '--states'):
-            vals.states = [int(arg)]  # TODO: parse list of integers
+            opts.states = utils.parse_ranges(arg)
         elif opt in ('-a', '--auto'):
-            vals.auto = True
+            opts.auto = True
         elif opt in ('-v', '--verbose'):
-            vals.verbose = True
+            opts.verbose = True
+
     if not opts.input_file:
-        print(usage_str)
+        print('ERROR: input file required\n' + usage_str)
         sys.exit(1)
+
     opts.output_file = opts.output_file or opts.input_file + '.out'
+
+    if opts.auto:
+        p = re.compile(r'.*--\w(\d+).*--K(\d+)p(\d+)c(\d+).*', flags=re.IGNORECASE)
+        m = p.match(opts.input_file)
+        if not m:
+            print('ERROR: filename does not match pattern for --auto. Expected:' +
+                  r'.*--\w(\d+).*--K(\d+)p(\d+)c(\d+).*')
+            sys.exit(2)
+        opts.trials = int(m.group(1))
+        opts.states = range(2, int(m.group(2)) + 1)
+        opts.jobs = utils.available_cpu_count()
+        # opts.padding = int(m.group(3))  # Unused
     return opts

@@ -7,10 +7,11 @@ Cross-validation can be performed on the results...
 
 ## Dependencies
 
-* [hmmlearn](https://github.com/hmmlearn): hmmlearn is a set of algorithms
- for unsupervised learning and inference of Hidden Markov Models.
-  Install in [conda](http://conda.pydata.org/) using
+* Python 2.7
+* [hmmlearn](https://github.com/hmmlearn): unsupervised learning and inference of Hidden Markov Models.
+  Install in [conda](http://conda.pydata.org/) with
     `conda install -c https://conda.anaconda.org/bcbio hmmlearn`
+* [concurrent.futures](https://pypi.python.org/pypi/futures): Backport from Python 3.2
 
 ## Usage
 
