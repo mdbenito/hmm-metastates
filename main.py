@@ -10,28 +10,27 @@ from alv import hmm_viz as viz
 from concurrent.futures import ProcessPoolExecutor
 
 
-def load_file(input_file, shift=-1):
+def load_observations(input_file, shift=-1):
     """
+    Loads a text file of integers (emissions of the HMM) into a numpy array.
 
     Parameters
     ----------
-    input_file
-    shift
-
-    Returns
-    -------
+    input_file: duh!
+    shift: If the integers in the file start at 1, use a shift of -1 (to conform to zero-indexed arrays)
 
     """
     series = np.loadtxt(input_file, dtype=np.int8)
-    series += shift  # series[:77*1000] - 1
+    series += shift
     return series
 
 
-def save_file(viterbi_path, output_file, shift=1):
+def save_viterbi(viterbi_path, output_file, shift=1):
     """
 
     Parameters
     ----------
+    viterbi_path:
     output_file
     shift
 
@@ -107,7 +106,7 @@ def main(argv):
     np.random.seed(42)
     opts = options.parse(argv)
     if opts.verbose: print('Loading file {}'.format(opts.input_file))
-    series = load_file(opts.input_file)
+    series = load_observations(opts.input_file)
     if opts.verbose: print('Inferring with n_states={0}, trials={1}, jobs={2}'.
                            format(opts.states, opts.trials, opts.jobs))
     with ProcessPoolExecutor(max_workers=opts.jobs) as ex:
@@ -116,7 +115,7 @@ def main(argv):
         n = len(opts.states)
         for vpath in ex.map(infer, [series] * n, opts.states, [opts.trials] * n, [opts.verbose] * n):
             if opts.output_file:
-                save_file(vpath, opts.output_file)
+                save_viterbi(vpath, opts.output_file)
             plot(series, vpath)
 
 

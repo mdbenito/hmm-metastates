@@ -15,7 +15,20 @@ Cross-validation can be performed on the results...
 
 ## Usage
 
-`python metastates.py ...`
+```
+Usage: python metastates.py -i <input-file> -o <output-file>
+
+Other options:
+	-h, --help          This help
+	-i, --input-file    Specifies the input file
+	-o, --output-file   Specifies the output file [default=input-file.out]
+	-j, --jobs          Number of concurrent jobs to launch [default=1]
+	-t, --trials        Set number of trials for input file [default=1]
+	-s, --states        Number of states to test [default=[2]]
+	-a, --auto          Parse input filename for number of trials and maximal K
+                        (Overrides -s, -t)
+	-v, --verbose       Display progress and time information
+```
 
 
 ## License
