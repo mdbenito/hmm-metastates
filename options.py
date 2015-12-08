@@ -7,22 +7,23 @@ from bunch import Bunch
 
 
 def parse(argv):
-    opts = Bunch({'input_file': None, 'output_file': None, 'jobs': 1, 'trials': 1, 'states': [2], 'auto': False,
-                  'verbose': False})
+    opts = Bunch({'input_file': None, 'output_file': None, 'jobs': 1, 'trials': 1, 'states': [2], 'nfold': None,
+                  'auto': True, 'verbose': False})
     usage_str = 'Usage: python metastates.py -i <input-file> -o <output-file>\n\nOther options:\n' + \
-                '\t-h, --help\t\t\tThis help\n' + \
+                '\t-h, --help\t\tThis help\n' + \
                 '\t-i, --input-file\tSpecifies the input file\n' + \
                 '\t-o, --output-file\tSpecifies the output file [default=input-file.out]\n' + \
-                '\t-j, --jobs\t\t\tNumber of concurrent jobs to launch [default={}]\n'.format(opts.jobs) + \
+                '\t-j, --jobs\t\tNumber of concurrent jobs to launch [default={}]\n'.format(opts.jobs) + \
                 '\t-t, --trials\t\tSet number of trials for input file [default={}]\n'.format(opts.trials) + \
                 '\t-s, --states\t\tNumber of states to test [default={}]\n'.format(opts.states) + \
-                '\t-a, --auto\t\t\tParse input filename for number of trials and maximal K\n' + \
-                '\t\t\t\t\t\t(Overrides -s, -t)\n' + \
+                '\t-a, --auto\t\tParse input filename for number of trials and maximal K\n' + \
+                '\t\t\t\t(Overrides -s, -t) [default={}]\n'.format(opts.auto) + \
+                '\t-c, --crossval\t\tPerform n-fold cross validation [default n={}]'.format(opts.nfold) + \
                 '\t-v, --verbose\t\tDisplay progress and time information'
     try:
-        vals, args = getopt.getopt(argv, 'hi:o:j:t:s:av',
+        vals, args = getopt.getopt(argv, 'hi:o:j:t:s:ac:v',
                                    ['help', 'input-file=', 'output-file=', 'jobs=', 'trials=', 'states=', 'auto',
-                                    'verbose'])
+                                    'crossval=', 'verbose'])
     except getopt.GetoptError as error:
         print('ERROR: ' + error + '\n' + usage_str)
         sys.exit(2)
@@ -42,6 +43,8 @@ def parse(argv):
             opts.states = utils.parse_ranges(arg)
         elif opt in ('-a', '--auto'):
             opts.auto = True
+        elif opt in ('-c', '--crossval'):
+            opts.nfold = int(arg)
         elif opt in ('-v', '--verbose'):
             opts.verbose = True
 
