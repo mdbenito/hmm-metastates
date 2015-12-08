@@ -8,7 +8,7 @@ import numpy as np
 import alv.vizcol as col
 import options
 from alv import hmm_viz as viz
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 
 def load_observations(input_file, shift=-1):
@@ -54,7 +54,7 @@ def compute_lengths(series, num_trials):
     return trial_length * np.ones(num_trials)
 
 
-def infer(series, lengths, n_states=2, viterbi=True, verbose=False, n_iter=100, tol=1e-1):
+def infer(series, lengths, n_states=2, viterbi=True, verbose=False, start=0, end=0, n_iter=10, tol=5e-1):
     """
 
     Parameters
@@ -64,6 +64,10 @@ def infer(series, lengths, n_states=2, viterbi=True, verbose=False, n_iter=100, 
     n_states
     viterbi: whether to compute the viterbi path
     verbose
+    start: HACK used to compute scores after the futures are done.
+    end: HACK
+    n_iter
+    tol
 
     Returns
     -------
@@ -84,7 +88,7 @@ def infer(series, lengths, n_states=2, viterbi=True, verbose=False, n_iter=100, 
         viterbi_path = m.predict(series[:, None], lengths=lengths)
         if verbose: print('Time for viterbi: {}s'.format(t.time() - tick))
 
-    return [m, viterbi_path]
+    return [[m, start, end], viterbi_path] # HACK HACK
 
 
 # Alv's plotting
@@ -109,17 +113,12 @@ def plot(series, viterbi_path, sr=250):
     pl.show()
 
 
-def _cross_validate(testing, training)
-
-
 def cross_validate(series, opts):
     """
     Reshapes the series as a num_trials x trial_length matrix, then splits its rows in N=opts.nfold subsets.
     For each k ∈ (1, max_states):
       Trains with one subset of trials then tests against the N-1 remaining (computes the log likelihood / score).
     Scores are averaged over all N training/test stages
-
-
     """
     if opts.verbose: print('Performing cross-validation with {} folds'.format(opts.nfold))
     scores = {k: 0 for k in opts.states}
@@ -128,24 +127,32 @@ def cross_validate(series, opts):
     # assert series.size % opts.trials == 0, 'Length of time series is not a multiple of number of trials'
     view = series.reshape((opts.trials, trial_length))  # FIXME: Truly a view?
     l = int(np.floor(opts.trials / opts.nfold))
-    for k in opts.states:
-        off = 0
-        if opts.verbose: print('Computing scores for k= {} states'.format(k))
-        while off < opts.trials:
-            start = off
-            end = min(off+l, opts.trials)
-            off = end
-            # testing_trials = end-start
-            testing = view[start:end].reshape(((end-start)*trial_length, 1))
-            training_trials = start + opts.trials-end
-            training = view[range(0, start)+range(end, opts.trials)].reshape(((start+opts.trials-end)*trial_length, 1))
-            training_lengths = compute_lengths(training, training_trials)
-            if opts.verbose: print('\tFitting for fold #{}'.format(int(np.ceil(off/l))))
-            m, _ = infer(training, training_lengths, n_states=k, viterbi=False, verbose=opts.verbose)
-            scores[k] += m.score(testing)
-            if opts.verbose: print('\tScore for this fold: {}'.format(scores[k]))
+    futures = []
+    with ProcessPoolExecutor(max_workers=opts.jobs) as ex:
+        for k in opts.states:
+            off = 0
+            #if opts.verbose: print('Computing scores for k= {} states'.format(k))
+            while off < opts.trials:
+                start = off
+                end = min(off+l, opts.trials)
+                off = end
+                training_trials = start + opts.trials-end
+                training = view[range(0, start)+range(end, opts.trials)].reshape(((start+opts.trials-end)*trial_length, 1))
+                training_lengths = compute_lengths(training, training_trials)
+                #if opts.verbose: print('\tFitting for fold #{}'.format(int(np.ceil(off/l))))
+                futures.append(ex.submit(infer, training, training_lengths,
+                                         n_states=k, viterbi=False, verbose=opts.verbose, start=start, end=end))
+                # m, _ = infer(training, training_lengths, n_states=k, viterbi=False, verbose=opts.verbose)
+
+    for fut in as_completed(futures):
+        [m, start, end], _ = fut.result()
+        k = m.n_components
+        testing = view[start:end].reshape(((end-start)*trial_length, 1))
+        scores[k] += m.score(testing)
+        if opts.verbose: print('\tScore for fold {} - {}: {}'.format(start, end, scores[k]))
+    for k in scores.keys():
         scores[k] /= np.ceil(opts.trials/l)  # Average score over the number of splits
-    print("Final scores= {}".format(scores))
+    return scores
 
 
 # WARNING: callables run by the Executor must be pickl-able
@@ -155,10 +162,11 @@ def main(argv):
     opts = options.parse(argv)
     if opts.verbose: print('Loading file {}'.format(opts.input_file))
     series = load_observations(opts.input_file)
-    if opts.verbose: print('Inferring with n_states={0}, trials={1}, jobs={2}'.format(opts.states, opts.trials, opts.jobs))
+    if opts.verbose: print('Working with n_states={0}, trials={1}, jobs={2}'.format(opts.states, opts.trials, opts.jobs))
 
     if opts.nfold:
-        cross_validate(series, opts)
+        scores = cross_validate(series, opts)
+        print("Final scores= {}".format(scores))
     else:
         with ProcessPoolExecutor(max_workers=opts.jobs) as ex:
             n = len(opts.states)
