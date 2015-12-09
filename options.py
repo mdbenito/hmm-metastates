@@ -12,20 +12,21 @@ def parse(argv):
     usage_str = 'Usage: python metastates.py -i <input-file> -o <output-file>\n\nOther options:\n' + \
                 '\t-h, --help\t\tThis help\n' + \
                 '\t-i, --input-file\tSpecifies the input file\n' + \
-                '\t-o, --output-file\tSpecifies the output file [default=input-file.out]\n' + \
+                '\t-o, --output-file\tSpecifies the output file\n' + \
+                '\t\t\t\t[default=input-file.out]\n' + \
                 '\t-j, --jobs\t\tNumber of concurrent jobs to launch [default={}]\n'.format(opts.jobs) + \
                 '\t-t, --trials\t\tSet number of trials for input file [default={}]\n'.format(opts.trials) + \
                 '\t-s, --states\t\tNumber of states to test [default={}]\n'.format(opts.states) + \
-                '\t-a, --auto\t\tParse input filename for number of trials and maximal K\n' + \
-                '\t\t\t\t(Overrides -s, -t) [default={}]\n'.format(opts.auto) + \
-                '\t-c, --crossval\t\tPerform n-fold cross validation [default n={}]'.format(opts.nfold) + \
+                '\t-a, --auto\t\tParse input filename for number of trials and\n' + \
+                '\t\t\t\tmaximal K (overrides -s, -t) [default={}]\n'.format(opts.auto) + \
+                '\t-c, --crossval\t\tPerform n-fold cross validation [default n={}]\n'.format(opts.nfold) + \
                 '\t-v, --verbose\t\tDisplay progress and time information'
     try:
         vals, args = getopt.getopt(argv, 'hi:o:j:t:s:ac:v',
                                    ['help', 'input-file=', 'output-file=', 'jobs=', 'trials=', 'states=', 'auto',
                                     'crossval=', 'verbose'])
     except getopt.GetoptError as error:
-        print('ERROR: ' + error + '\n' + usage_str)
+        print('ERROR: ' + error.msg + '\n' + usage_str)
         sys.exit(2)
     for opt, arg in vals:
         if opt in ('-h', '--help'):
