@@ -32,8 +32,8 @@ def cyclic_col(clist):
 
 
 # could actually return a color map!
-def stdcolors(i):
-    return cyclic_col()
+def stdcolors():
+    return cyclic_col(standard_color_list)
 
 
 
