@@ -7,23 +7,26 @@ from bunch import Bunch
 
 
 def parse(argv):
-    opts = Bunch({'input_file': None, 'output_file': None, 'jobs': 1, 'trials': 1, 'states': [2], 'nfold': None,
-                  'auto': True, 'verbose': False})
-    usage_str = 'Usage: python metastates.py -i <input-file> -o <output-file>\n\nOther options:\n' + \
-                '\t-h, --help\t\tThis help\n' + \
-                '\t-i, --input-file\tSpecifies the input file\n' + \
-                '\t-o, --output-file\tSpecifies the output file\n' + \
-                '\t\t\t\t[default=input-file.out]\n' + \
-                '\t-j, --jobs\t\tNumber of concurrent jobs to launch [default={}]\n'.format(opts.jobs) + \
-                '\t-t, --trials\t\tSet number of trials for input file [default={}]\n'.format(opts.trials) + \
-                '\t-s, --states\t\tNumber of states to test [default={}]\n'.format(opts.states) + \
-                '\t-a, --auto\t\tParse input filename for number of trials and\n' + \
-                '\t\t\t\tmaximal K (overrides -s, -t) [default={}]\n'.format(opts.auto) + \
-                '\t-c, --crossval\t\tPerform n-fold cross validation [default n={}]\n'.format(opts.nfold) + \
-                '\t-v, --verbose\t\tDisplay progress and time information'
+    opts = Bunch({'input_file': None, 'output_file': None, 'jobs': 1, 'trials': 1, 'states': [2],
+                  'nfold': None, 'auto': False, 'verbose': False})
+    usage_str = str(
+        "Usage: python metastates.py -i <input-file> -o <output-file>\n\nOther options:\n"
+        "    -h, --help           This help\n"
+        "    -i, --input-file     Specifies the input file\n"
+        "    -o, --output-file    Specifies the output file\n"
+        "                         [default=input-file.out]\n"
+        "    -j, --jobs           Number of concurrent jobs to launch [default={0}]\n"
+        "    -t, --trials         Set number of trials for input file [default={1}]\n"
+        "    -s, --states         Number of states to test [default={2}]\n"
+        "    -a, --auto           Parse input filename for number of trials and\n"
+        "                         maximal K (overrides -s, -t) [default={3}]\n"
+        "    -c, --crossval       Perform n-fold cross validation [default n={4}]\n"
+        "    -v, --verbose        Display progress and time information")\
+        .format(opts.jobs, opts.trials, opts.states, opts.auto, opts.nfold)
     try:
         vals, args = getopt.getopt(argv, 'hi:o:j:t:s:ac:v',
-                                   ['help', 'input-file=', 'output-file=', 'jobs=', 'trials=', 'states=', 'auto',
+                                   ['help', 'input-file=', 'output-file=', 'jobs=', 'trials=',
+                                    'states=', 'auto',
                                     'crossval=', 'verbose'])
     except getopt.GetoptError as error:
         print('ERROR: ' + error.msg + '\n' + usage_str)
