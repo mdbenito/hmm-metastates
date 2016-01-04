@@ -54,7 +54,7 @@ def compute_lengths(series, num_trials):
     return trial_length * np.ones(num_trials)
 
 
-def infer(series, lengths, n_states=2, viterbi=True, verbose=False, start=0, end=0, n_iter=2000,
+def infer(series, lengths, n_states=2, viterbi=True, verbose=False, start=0, end=0, n_iter=4000,
           tol=1e-6):
     """
 
@@ -168,7 +168,7 @@ def main(argv):
     opts = options.parse(argv)
     if opts.verbose:
         print("Loading file {}".format(opts.input_file))
-    series = load_observations(opts.input_file)
+    series = load_observations(opts.input_file, opts.shift)
     lengths = compute_lengths(series, opts.trials)
     if opts.verbose:
         print("Working with n_states={0}, trials={1}, jobs={2}"

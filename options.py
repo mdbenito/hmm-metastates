@@ -7,27 +7,29 @@ from bunch import Bunch
 
 
 def parse(argv):
-    opts = Bunch({'input_file': None, 'output_file': None, 'jobs': 1, 'trials': 1, 'states': [2],
-                  'nfold': None, 'auto': False, 'verbose': False})
+    opts = Bunch({'input_file': None, 'output_file': None, 'shift': -1, 'jobs': 1, 'trials': 1,
+                  'states': [2], 'nfold': None, 'auto': False, 'verbose': False})
     usage_str = str(
         "Usage: python metastates.py -i <input-file> -o <output-file>\n\nOther options:\n"
         "    -h, --help           This help\n"
         "    -i, --input-file     Specifies the input file\n"
         "    -o, --output-file    Specifies the output file\n"
         "                         [default=input-file.out]\n"
-        "    -j, --jobs           Number of concurrent jobs to launch [default={0}]\n"
-        "    -t, --trials         Set number of trials for input file [default={1}]\n"
-        "    -s, --states         Number of states to test [default={2}]\n"
+        "    -f, --shift          Apply shift to data in input file [default={0}]\n"
+        "    -t, --trials         Set number of trials for input file [default={2}]\n"
+        "    -s, --states         Number of states to use [default={3}]\n"
+        "                         (interpreted as a maximum when cross-validating)\n"
         "    -a, --auto           Parse input filename for number of trials and\n"
-        "                         maximal K (overrides -s, -t) [default={3}]\n"
-        "    -c, --crossval       Perform n-fold cross validation [default n={4}]\n"
+        "                         number of states (overrides -s, -t) [default={4}]\n"
+        "    -c, --crossval       Perform n-fold cross-validation [default n={5}]\n"
+        "    -j, --jobs           Number of concurrent jobs to launch [default={1}]\n"
         "    -v, --verbose        Display progress and time information")\
-        .format(opts.jobs, opts.trials, opts.states, opts.auto, opts.nfold)
+        .format(opts.shift, opts.jobs, opts.trials, opts.states, opts.auto, opts.nfold)
     try:
-        vals, args = getopt.getopt(argv, 'hi:o:j:t:s:ac:v',
-                                   ['help', 'input-file=', 'output-file=', 'jobs=', 'trials=',
-                                    'states=', 'auto',
-                                    'crossval=', 'verbose'])
+        vals, args = getopt.getopt(argv, 'hi:o:f:t:s:ac:j:v',
+                                   ['help', 'input-file=', 'output-file=', 'shift=',
+                                    'trials=', 'states=', 'auto',
+                                    'crossval=', 'jobs=', 'verbose'])
     except getopt.GetoptError as error:
         print('ERROR: ' + error.msg + '\n' + usage_str)
         sys.exit(2)
@@ -39,8 +41,8 @@ def parse(argv):
             opts.input_file = arg
         elif opt in ('-o', '--output-file'):
             opts.output_file = arg
-        elif opt in ('-j', '--jobs'):
-            opts.jobs = int(arg)
+        elif opt in ('-f', '--shift'):
+            opts.shift = int(arg)
         elif opt in ('-t', '--trials'):
             opts.trials = int(arg)
         elif opt in ('-s', '--states'):
@@ -49,6 +51,8 @@ def parse(argv):
             opts.auto = True
         elif opt in ('-c', '--crossval'):
             opts.nfold = int(arg)
+        elif opt in ('-j', '--jobs'):
+            opts.jobs = int(arg)
         elif opt in ('-v', '--verbose'):
             opts.verbose = True
 
