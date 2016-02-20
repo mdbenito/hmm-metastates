@@ -1,13 +1,13 @@
 # metastates
 
-Models a sequence of states coming from an autoregressive Hidden Markov model
+Models a sequence of states coming from an Autoregressive Hidden Markov Model [2]
 again as an HMM. Multiple runs can be run in parallel to compute using different
 numbers of hidden states of the HMM (_meta-states_).
 
 Assuming independence of the different experimental trials fed to the algorithm,
 it is also possible to use cross-validation to determine the optimal (in the sense
 of maximal likelihood of the sequence of states) choice for the number of hidden
-states. See [3] for a discussionof two alternative methods in the case that one only
+states. See [3] for a discussion of two alternative methods in the case that one only
 has a single run for training, in which case removing samples for cross-validation
 would break the Markov property.
 
@@ -45,13 +45,18 @@ Other options:
     -v, --verbose        Display progress and time information
 ```
 
+## Disclaimer
+
+This software was developed with specific datasets in mind in the context of a short
+stay at the chair of Computational Neuroscience of the [department of Neurobiology](http://www.neuro.bio.lmu.de/) in the Ludwig-Maximilians-Universität and is not a general purpose implementation.
+
 ## References:
 
-[1] L. R. Rabiner, “A tutorial on hidden Markov models and selected applications in speech recognition,” in Proceedings of the IEEE, 1989, vol. 77, pp. 257–286.
+[1] L. R. Rabiner, “[A tutorial on hidden Markov models and selected applications in speech recognition](http://www.ee.columbia.edu/~dpwe/e6820/papers/Rabiner89-hmm.pdf),” in Proceedings of the IEEE, 1989, vol. 77, pp. 257–286.
 
-[1] M. J. Cassidy and P. Brown, “Hidden Markov based autoregressive analysis of stationary and non-stationary electrophysiological signals for functional coupling studies,” Journal of Neuroscience Methods, vol. 116, no. 1, pp. 35–53, Apr. 2002.
+[2] M. J. Cassidy and P. Brown, “[Hidden Markov based autoregressive analysis of stationary and non-stationary electrophysiological signals for functional coupling studies](http://www.sciencedirect.com/science/article/pii/S0165027002000262),” Journal of Neuroscience Methods, vol. 116, no. 1, pp. 35–53, Apr. 2002.
 
-[3] G. Celeux and J.-B. Durand, “Selecting hidden Markov model state number with cross-validated likelihood,” Comput Stat, vol. 23, no. 4, pp. 541–564, Dec. 2007.
+[3] G. Celeux and J.-B. Durand, “[Selecting hidden Markov model state number with cross-validated likelihood](https://hal.inria.fr/inria-00071392/document),” Comput Stat, vol. 23, no. 4, pp. 541–564, Dec. 2007.
 
 
 ## License
